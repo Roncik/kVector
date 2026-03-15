@@ -20,6 +20,9 @@
     <Filter Include="PCH">
       <UniqueIdentifier>{3da37cea-6a76-4596-bcee-ab1d306e3d73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Vector">
+      <UniqueIdentifier>{6af2f6c8-b89f-4ba5-b0f5-d2ed3d55395c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="kvector.inf">
@@ -33,10 +36,16 @@
     <ClCompile Include="pch.cpp">
       <Filter>PCH</Filter>
     </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>Vector</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Vector</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
