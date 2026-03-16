@@ -3,42 +3,43 @@
 #define POOLTAG 'KVEC'
 
 #define STATUS_HEAP_ALLOCATION_FAILED ((NTSTATUS)'VEC1')
+#define STATUS_EMPTY ((NTSTATUS)'VEC2')
 
 template <typename T>
 class Vector
 {
-	T* data{};
-	SIZE_T size{};
-	SIZE_T capacity{};
-	const SIZE_T type_size = sizeof(T);
-	constexpr SIZE_T byte_size() { return size * sizeof(T); }
-	constexpr SIZE_T byte_capacity() { return capacity * sizeof(T); }
+	T* m_data{};
+	SIZE_T m_size{};
+	SIZE_T m_capacity{};
 
 
+	const SIZE_T type_size{ sizeof(T) };
+	constexpr SIZE_T byte_size() { return m_size * sizeof(T); }
+	constexpr SIZE_T byte_capacity() { return m_capacity * sizeof(T); }
 public:
 	Vector() = default;
 
 	// Rule of five
 	~Vector()
 	{
-		if (data)
+		if (m_data)
 		{
-			ExFreePool2(data, POOLTAG, NULL, NULL);
+			ExFreePool2(m_data, POOLTAG, NULL, NULL);
 		}
 	}
 
 	Vector(const Vector& other) // copy constructor
 	{
-		if (other.capacity)
+		if (other.m_capacity)
 		{
 			// deep copy
-			data = ExAllocatePool2(POOL_FLAG_NON_PAGED, other.capacity * sizeof(T), POOLTAG);
-			if (!data)
+			m_data = ExAllocatePool2(POOL_FLAG_NON_PAGED, other.m_capacity * sizeof(T), POOLTAG);
+			if (!m_data)
 				ExRaiseStatus(STATUS_HEAP_ALLOCATION_FAILED);// SEH exception
-			RtlCopyMemory(data, other.data, other.size); // no need to copy all capacity, size is enough
+			RtlCopyMemory(m_data, other.m_data, other.m_size); // no need to copy all capacity, size is enough
 
-			size = other.size;
-			capacity = other.capacity;
+			m_size = other.m_size;
+			m_capacity = other.m_capacity;
 		}
 	}
 
@@ -47,28 +48,28 @@ public:
 		if (this == &other)
 			return *this;
 
-		if (other.capacity)
+		if (other.m_capacity)
 		{
 			// deep copy
-			T* temp = ExAllocatePool2(POOL_FLAG_NON_PAGED, other.capacity * sizeof(T), POOLTAG); // this can throw
+			T* temp = ExAllocatePool2(POOL_FLAG_NON_PAGED, other.m_capacity * sizeof(T), POOLTAG); // this can throw
 			if (!temp)
 				ExRaiseStatus(STATUS_HEAP_ALLOCATION_FAILED);// SEH exception
-			RtlCopyMemory(data, other.data, other.size * sizeof(T)); // no need to copy all capacity, size is enough
+			RtlCopyMemory(m_data, other.m_data, other.m_size * sizeof(T)); // no need to copy all capacity, size is enough
 
 
-			if (capacity) //discard existing memory
-				ExFreePool2(data, POOLTAG, NULL, NULL);
+			if (m_capacity) //discard existing memory
+				ExFreePool2(m_data, POOLTAG, NULL, NULL);
 
-			data = temp;
-			size = other.size;
-			capacity = other.capacity;
+			m_data = temp;
+			m_size = other.m_size;
+			m_capacity = other.m_capacity;
 		}
 		else
 		{
 			//shallow copy
-			data = other.data;
-			size = other.size;
-			capacity = other.capacity;
+			m_data = other.m_data;
+			m_size = other.m_size;
+			m_capacity = other.m_capacity;
 		}
 		
 		return *this;
@@ -78,13 +79,13 @@ public:
 	{
 		//no std::swap available so trivial method used
 		
-		data = other.data;
-		size = other.size;
-		capacity = other.capacity;
+		m_data = other.m_data;
+		m_size = other.m_size;
+		m_capacity = other.m_capacity;
 
-		other.data = nullptr;
-		other.size = 0;
-		other.capacity = 0;
+		other.m_data = nullptr;
+		other.m_size = 0;
+		other.m_capacity = 0;
 	}
 
 	Vector& operator=(Vector&& other) noexcept //move assignment operator
@@ -92,76 +93,164 @@ public:
 		if (this == &other)
 			return *this;
 
-		if (capacity) //discard existing memory
-			ExFreePool2(data, POOLTAG, NULL, NULL);
+		if (m_capacity) //discard existing memory
+			ExFreePool2(m_data, POOLTAG, NULL, NULL);
 
-		data = other.data;
-		size = other.size;
-		capacity = other.capacity;
+		m_data = other.m_data;
+		m_size = other.m_size;
+		m_capacity = other.m_capacity;
 
-		other.data = nullptr;
-		other.size = 0;
-		other.capacity = 0;
+		other.m_data = nullptr;
+		other.m_size = 0;
+		other.m_capacity = 0;
 
 		return *this;
 	}
 
+	SIZE_T size() const noexcept { return m_size; }
+	SIZE_T capacity() const noexcept { return m_capacity; }
+
 	T& at(ULONG idx) const
 	{
-		if (idx > (size - 1))
+		if (idx > (m_size - 1))
 		{
 			ExRaiseStatus(STATUS_INDEX_OUT_OF_BOUNDS);// SEH exception
 		}
 
-		return data[idx];
+		return m_data[idx];
 	}
 
 	VOID push_back(const T& object)
 	{
-		++size;
+		++m_size;
 		
-		if (size > capacity)
-			increase_capacity(size);
+		if (m_size > m_capacity)
+			increase_capacity(m_size);
 
-		data[size - 1] = object;
+		m_data[m_size - 1] = object;
 	}
 
 	VOID push_front(const T& object)
 	{
-		++size;
+		++m_size;
 
-		if (size > capacity)
-			increase_capacity(size);
+		if (m_size > m_capacity)
+			increase_capacity(m_size);
 
-		RtlMoveMemory(&data[1], data, (size - 1) * sizeof(T));
+		RtlMoveMemory(&m_data[1], m_data, (m_size - 1) * sizeof(T));
 
-		data[0] = object;
+		m_data[0] = object;
 	}
+
+	const T& front() const
+	{
+		if (m_size > 0)
+			return m_data[0];
+		else
+			ExRaiseStatus(STATUS_EMPTY);
+	}
+
+	T& front()
+	{
+		if (m_size > 0)
+			return m_data[0];
+		else
+			ExRaiseStatus(STATUS_EMPTY);
+	}
+
+	const T& back() const
+	{
+		if (m_size > 0)
+			return m_data[m_size - 1];
+		else
+			ExRaiseStatus(STATUS_EMPTY);
+	}
+
+	T& back()
+	{
+		if (m_size > 0)
+			return m_data[m_size - 1];
+		else
+			ExRaiseStatus(STATUS_EMPTY);
+	}
+
+	T& operator[](SIZE_T idx)
+	{
+		return m_data[idx];
+	}
+
+	T operator[](SIZE_T idx) const
+	{
+		return m_data[idx];
+	}
+
+	const T* data() const noexcept
+	{
+		return m_data;
+	}
+
+	T* data() noexcept
+	{
+		return m_data;
+	}
+
+	VOID swap(Vector& other) noexcept
+	{
+		auto swap = []<typename T>(T& first, T& second) -> void
+		{
+			if (&first == &second)
+				return;
+			first ^= second;
+			second ^= first;
+			first ^= second;
+		};
+
+		swap(m_data, other.m_data);
+		swap(m_capacity, other.m_capacity);
+		swap(m_size, other.m_size);
+	}
+
+	BOOLEAN empty() noexcept
+	{
+		return !m_size;
+	}
+
+	VOID clear()
+	{
+		if (m_data)
+		{
+			ExFreePool2(m_data, POOLTAG, NULL, NULL);
+		}
+		m_size = 0;
+		m_capacity = 0;
+		m_data = 0;
+	}
+
 
 private:
 
 	VOID increase_capacity(SIZE_T required_size)
 	{
 
-		if (required_size <= capacity) // sanity check
+		if (required_size <= m_capacity) // sanity check
 			return;
-		else if (capacity == 0)
-			capacity = 1;
+		else if (m_capacity == 0)
+			m_capacity = 1;
 
-		while (capacity < required_size)
-			capacity *= 2;
+		while (m_capacity < required_size)
+			m_capacity *= 2;
 
 		T* new_buffer = static_cast<T*>(ExAllocatePool2(POOL_FLAG_NON_PAGED, byte_capacity(), POOLTAG));
 		if (!new_buffer)
 			ExRaiseStatus(STATUS_HEAP_ALLOCATION_FAILED);// SEH exception
 
-		if (data)
+		if (m_data)
 		{
-			RtlCopyMemory(new_buffer, data, byte_size());
-			ExFreePool2(data, POOLTAG, NULL, NULL);
+			RtlCopyMemory(new_buffer, m_data, byte_size());
+			ExFreePool2(m_data, POOLTAG, NULL, NULL);
 		}
 
-		data = new_buffer;
+		m_data = new_buffer;
 	}
 };
 

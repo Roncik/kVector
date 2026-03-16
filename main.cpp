@@ -46,24 +46,15 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 	for (int i = 0; i < 12; ++i)
 		vec.push_back(i);
 
-	DbgPrintEx(0, 0, "%ld\n", vec.at(6));
-	DbgPrintEx(0, 0, "%ld\n", vec.at(8));
-	DbgPrintEx(0, 0, "%ld\n", vec.at(0));
-	DbgPrintEx(0, 0, "%ld\n", vec.at(11));
-	__try
-	{
-		DbgPrintEx(0, 0, "%ld\n", vec.at(12));
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER)
-	{
-		DbgPrintEx(0, 0, "exception \"STATUS_INDEX_OUT_OF_BOUNDS\" thrown\n");
-	}
+	for (SIZE_T i = 0; i < vec.size(); ++i)
+		DbgPrintEx(0, 0, "%ld\n", vec[i]);
 
-	DbgPrintEx(0, 0, "%ld\n", vec.at(0));
-	vec.push_front(67);
-	DbgPrintEx(0, 0, "%ld\n", vec.at(0));
-	DbgPrintEx(0, 0, "%ld\n", vec.at(1));
-	DbgPrintEx(0, 0, "%ld\n", vec.at(2));
+	DbgPrintEx(0, 0, "back: %ld\n", vec.back());
+	DbgPrintEx(0, 0, "front: %ld\n", vec.front());
+
+	vec.clear();
+
+	DbgPrintEx(0, 0, "front: %ld\n", vec.front());
 
 	return STATUS_SUCCESS;
 }
