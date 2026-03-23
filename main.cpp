@@ -42,7 +42,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 	DriverObject->DriverUnload = DriverUnload;
 
 
-	Vector<ULONG> vec;
+	/*Vector<ULONG> vec;
 	for (int i = 0; i < 12; ++i)
 		vec.push_back(i);
 
@@ -54,7 +54,41 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 
 	vec.clear();
 
-	DbgPrintEx(0, 0, "front: %ld\n", vec.front());
+	DbgPrintEx(0, 0, "front: %ld\n", vec.front());*/
+
+
+	UNICODE_STRING us[5];
+	Vector<UNICODE_STRING> usvec{};
+	for (int i = 0; i < 5; ++i)
+	{
+		RtlInitUnicodeString(&us[i], L"Unicode_string!");
+		usvec.push_back(us[i]);
+	}
+
+	//bruh
+	auto print_unicode_string = [](UNICODE_STRING us) -> void
+		{
+			Vector<WCHAR> buff;
+			for (int i = 0; i < us.Length; ++i)
+				buff.push_back(us.Buffer[i]);
+			buff.push_back(L'\0');
+			DbgPrintEx(0, 0, "%ls", buff.data());
+		};
+
+	for (SIZE_T i = 0; i < usvec.size(); ++i)
+	{
+		print_unicode_string(usvec[i]);
+	}
+
+	for (const auto& z : usvec) // range based for loop  ...hooray
+	{
+		print_unicode_string(z);
+	}
+
+
+	/*Vector<ULONG> vec(10, 5);
+	for (SIZE_T i = 0; i < vec.size(); ++i)
+		DbgPrintEx(0, 0, "%ld\n", vec[i]);*/
 
 	return STATUS_SUCCESS;
 }
