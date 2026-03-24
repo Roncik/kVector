@@ -41,6 +41,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 
 	DriverObject->DriverUnload = DriverUnload;
 
+	//Vector<ULONG> vec;
 
 	/*Vector<ULONG> vec;
 	for (int i = 0; i < 12; ++i)
