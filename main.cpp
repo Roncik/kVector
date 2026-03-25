@@ -57,7 +57,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 
 	DbgPrintEx(0, 0, "front: %ld\n", vec.front());*/
 
-
 	UNICODE_STRING us[5];
 	Vector<UNICODE_STRING> usvec{};
 	for (int i = 0; i < 5; ++i)

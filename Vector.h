@@ -22,7 +22,7 @@ class Vector
 	SIZE_T byte_capacity() { return m_capacity * sizeof(T); }
 public:
 	Vector() : Vector(0) {}
-	Vector(SIZE_T initial_size, const T& val = T{})
+	explicit Vector(SIZE_T initial_size, const T& val = T{})
 	{
 		init();
 		increase_capacity(initial_size);
