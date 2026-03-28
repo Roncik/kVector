@@ -20,6 +20,9 @@ I tried to replicate their semantics as similar to std as I could
 - resize
 - begin
 - end
+- operator[]
+- operator+
+- operator+=
 
 # Docs
 ## Exceptions
