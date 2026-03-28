@@ -18,8 +18,8 @@ class Vector
 	VOID init();
 
 	SIZE_T type_size{ sizeof(T) };
-	SIZE_T byte_size() { return m_size * sizeof(T); }
-	SIZE_T byte_capacity() { return m_capacity * sizeof(T); }
+	SIZE_T byte_size() const { return m_size * sizeof(T); }
+	SIZE_T byte_capacity() const { return m_capacity * sizeof(T); }
 public:
 	Vector() : Vector(0) {}
 	explicit Vector(SIZE_T initial_size, const T& val = T{})
@@ -144,6 +144,10 @@ public:
 	//const Treference operator[] is called for const vectors for read-only access
 	const T& operator[](SIZE_T idx) const;
 
+	Vector<T> operator+(const Vector<T>& rhs) const;
+
+	Vector<T>& operator+=(const Vector<T>& rhs);
+
 	const T* data() const noexcept;
 	T* data() noexcept;
 
@@ -171,8 +175,8 @@ private:
 
 	VOID increase_capacity(SIZE_T required_size);
 
-	PVOID Allocate(SIZE_T size);
-	VOID Free(PVOID P);
+	static PVOID Allocate(SIZE_T size);
+	static VOID Free(PVOID P);
 };
 
 template<typename T>
@@ -297,6 +301,46 @@ inline const T& Vector<T>::operator[](SIZE_T idx) const
 }
 
 template<typename T>
+inline Vector<T> Vector<T>::operator+(const Vector<T>& rhs) const
+{
+	SIZE_T new_capacity{ m_capacity + rhs.m_capacity };
+	SIZE_T new_size{ m_size + rhs.m_size };
+	T* new_data{ static_cast<T*>(Allocate(new_capacity)) };
+	if (!new_data)
+		ExRaiseStatus(STATUS_HEAP_ALLOCATION_FAILED);
+
+	RtlCopyMemory(new_data, m_data, byte_size());
+	RtlCopyMemory(new_data + m_size, rhs.m_data, rhs.byte_size());
+
+	Vector<T> output;
+	output.m_data = new_data;
+	output.m_size = new_size;
+	output.m_capacity = new_capacity;
+
+	return output;
+}
+
+template<typename T>
+inline Vector<T>& Vector<T>::operator+=(const Vector<T>& rhs)
+{
+	SIZE_T new_capacity{ m_capacity + rhs.m_capacity };
+	SIZE_T new_size{ m_size + rhs.m_size };
+	T* new_data{ static_cast<T*>(Allocate(new_capacity)) };
+	if (!new_data)
+		ExRaiseStatus(STATUS_HEAP_ALLOCATION_FAILED);
+
+	RtlCopyMemory(new_data, m_data, byte_size());
+	RtlCopyMemory(new_data + m_size, rhs.m_data, rhs.byte_size());
+
+	Free(m_data);
+	m_data = new_data;
+	m_size = new_size;
+	m_capacity = new_capacity;
+
+	return *this;
+}
+
+template<typename T>
 inline T& Vector<T>::operator[](SIZE_T idx)
 {
 	return m_data[idx];
@@ -369,7 +413,7 @@ inline VOID Vector<T>::resize(SIZE_T new_size, const T& val)
 		for (SIZE_T i = m_size; i < new_size; ++i)
 		{
 			// there is no placement new in kernel?
-			//new (&m_data[i]) T(val);
+			// new (&m_data[i]) T(val);
 			m_data[i] = T(val);
 		}
 		m_size = new_size;

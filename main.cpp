@@ -41,7 +41,12 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 
 	DriverObject->DriverUnload = DriverUnload;
 
-	//Vector<ULONG> vec;
+	Vector<ULONG> vec1(5, 1);
+	Vector<ULONG> vec2(5, 2);
+	Vector<ULONG> vec3 = vec1 + vec2;
+	vec3 += vec2;
+	for (const auto& x : vec3)
+		DbgPrintEx(0, 0, "%ld\n", x);
 
 	/*Vector<ULONG> vec;
 	for (int i = 0; i < 12; ++i)
@@ -53,37 +58,37 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 	DbgPrintEx(0, 0, "back: %ld\n", vec.back());
 	DbgPrintEx(0, 0, "front: %ld\n", vec.front());
 
-	vec.clear();
+	vec.clear();*/
 
-	DbgPrintEx(0, 0, "front: %ld\n", vec.front());*/
+	//DbgPrintEx(0, 0, "front: %ld\n", vec.front()); //exception thrown here
 
-	UNICODE_STRING us[5];
-	Vector<UNICODE_STRING> usvec{};
-	for (int i = 0; i < 5; ++i)
-	{
-		RtlInitUnicodeString(&us[i], L"Unicode_string!");
-		usvec.push_back(us[i]);
-	}
+	//UNICODE_STRING us[5];
+	//Vector<UNICODE_STRING> usvec{};
+	//for (int i = 0; i < 5; ++i)
+	//{
+	//	RtlInitUnicodeString(&us[i], L"Unicode_string!");
+	//	usvec.push_back(us[i]);
+	//}
 
-	//bruh
-	auto print_unicode_string = [](UNICODE_STRING us) -> void
-		{
-			Vector<WCHAR> buff;
-			for (int i = 0; i < us.Length; ++i)
-				buff.push_back(us.Buffer[i]);
-			buff.push_back(L'\0');
-			DbgPrintEx(0, 0, "%ls", buff.data());
-		};
+	////bruh
+	//auto print_unicode_string = [](UNICODE_STRING us) -> void
+	//	{
+	//		Vector<WCHAR> buff;
+	//		for (int i = 0; i < us.Length; ++i)
+	//			buff.push_back(us.Buffer[i]);
+	//		buff.push_back(L'\0');
+	//		DbgPrintEx(0, 0, "%ls", buff.data());
+	//	};
 
-	for (SIZE_T i = 0; i < usvec.size(); ++i)
-	{
-		print_unicode_string(usvec[i]);
-	}
+	//for (SIZE_T i = 0; i < usvec.size(); ++i)
+	//{
+	//	print_unicode_string(usvec[i]);
+	//}
 
-	for (const auto& z : usvec) // range based for loop  ...hooray
-	{
-		print_unicode_string(z);
-	}
+	//for (const auto& z : usvec) // range based for loop  ...hooray
+	//{
+	//	print_unicode_string(z);
+	//}
 
 
 	/*Vector<ULONG> vec(10, 5);
