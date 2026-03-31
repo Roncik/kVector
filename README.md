@@ -11,6 +11,8 @@ I tried to replicate their semantics as similar to std as I could
 - at
 - push_back
 - push_front
+- pop_back
+- pop_front
 - front
 - back
 - data
@@ -23,6 +25,7 @@ I tried to replicate their semantics as similar to std as I could
 - operator[]
 - operator+
 - operator+=
+- operator==
 
 # Docs
 ## Exceptions

@@ -41,12 +41,31 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 
 	DriverObject->DriverUnload = DriverUnload;
 
-	Vector<ULONG> vec1(5, 1);
+	/*Vector<ULONG> vec1(5, 1);
 	Vector<ULONG> vec2(5, 2);
 	Vector<ULONG> vec3 = vec1 + vec2;
 	vec3 += vec2;
 	for (const auto& x : vec3)
-		DbgPrintEx(0, 0, "%ld\n", x);
+		DbgPrintEx(0, 0, "%ld\n", x);*/
+
+	/*Vector<UINT8> dvec1(10, 'a');
+	Vector<unsigned char> dvec2(10, 'b');
+	bool isequal = (dvec1 == dvec2);
+	DbgPrintEx(0, 0, "%d\n", isequal);*/
+
+	char cstylearray[] = { 'a', 'b', 'c', 'd', 'e'};
+	Vector vec(cstylearray, sizeof(cstylearray));
+	for (const auto& c : vec)
+		DbgPrintEx(0, 0, "%c\n", c);
+	DbgPrintEx(0, 0, "Size: %lld\n", vec.size());
+	DbgPrintEx(0, 0, "Capacity: %lld\n", vec.capacity());
+
+
+
+	/*Vector<ULONG> vec(5, 100);
+	vec.pop_front();
+	for (const auto& x : vec)
+		DbgPrintEx(0, 0, "%ld\n", x);*/
 
 	/*Vector<ULONG> vec;
 	for (int i = 0; i < 12; ++i)

@@ -28,6 +28,13 @@ public:
 		increase_capacity(initial_size);
 		resize(initial_size, val);
 	}
+	Vector(const T* data, SIZE_T size)
+	{
+		init();
+		increase_capacity(size);
+		resize(size);
+		RtlCopyMemory(m_data, data, size);
+	}
 
 	// Rule of five
 	~Vector()
@@ -132,6 +139,10 @@ public:
 
 	VOID push_front(const T& object);
 
+	T pop_back();
+
+	T pop_front();
+
 	T& front();
 	//const Treference front() is called for const vectors for read-only access 
 	const T& front() const;
@@ -147,6 +158,8 @@ public:
 	Vector<T> operator+(const Vector<T>& rhs) const;
 
 	Vector<T>& operator+=(const Vector<T>& rhs);
+
+	BOOLEAN operator==(const Vector<T>& rhs) const;
 
 	const T* data() const noexcept;
 	T* data() noexcept;
@@ -259,6 +272,33 @@ inline VOID Vector<T>::push_front(const T& object)
 }
 
 template<typename T>
+inline T Vector<T>::pop_back()
+{
+	if (!m_size)
+		ExRaiseStatus(STATUS_EMPTY);
+
+	--m_size;
+	T output = m_data[m_size];
+	m_data[m_size].~T();
+	return output;
+}
+
+template<typename T>
+inline T Vector<T>::pop_front()
+{
+	if (!m_size)
+		ExRaiseStatus(STATUS_EMPTY);
+
+	--m_size;
+	T output = m_data[0];
+	m_data[0].~T();
+
+	RtlMoveMemory(&m_data[0], &m_data[1], byte_size());
+
+	return output;
+}
+
+template<typename T>
 inline T& Vector<T>::front()
 {
 	if (!empty())
@@ -338,6 +378,20 @@ inline Vector<T>& Vector<T>::operator+=(const Vector<T>& rhs)
 	m_capacity = new_capacity;
 
 	return *this;
+}
+
+template<typename T>
+inline BOOLEAN Vector<T>::operator==(const Vector<T>& rhs) const
+{
+	if (size() != rhs.size())
+		return FALSE;
+	for (SIZE_T i = 0; i < size(); ++i)
+	{
+		if (this->m_data[i] != rhs.m_data[i])
+			return FALSE;
+	}
+
+	return TRUE;
 }
 
 template<typename T>
